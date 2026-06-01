@@ -252,9 +252,13 @@ fn known_context_window_for_model(model_lower: &str) -> Option<u32> {
         | "moonshotai/kimi-k2.6"
         | "moonshotai/kimi-k2.6:free" => Some(262_144),
         "z-ai/glm-5.1" | "z-ai/glm-5v-turbo" => Some(202_752),
-        "qwen/qwen3.7-max" | "xiaomi/mimo-v2.5-pro" | "xiaomi/mimo-v2.5" | "qwen/qwen3.6-plus" => {
-            Some(1_000_000)
-        }
+        "minimax/minimax-m3" => Some(1_000_000),
+        "qwen/qwen3.7-max"
+        | "xiaomi/mimo-v2.5-pro"
+        | "xiaomi/mimo-v2.5"
+        | "mimo-v2.5-pro"
+        | "mimo-v2.5"
+        | "qwen/qwen3.6-plus" => Some(1_000_000),
         _ => None,
     }
 }
@@ -267,8 +271,11 @@ pub fn max_output_tokens_for_model(model: &str) -> Option<u32> {
     }
     match lower.as_str() {
         "arcee-ai/trinity-large-thinking" | "moonshotai/kimi-k2.6" => Some(262_144),
+        "minimax/minimax-m3" => Some(524_288),
         "qwen/qwen3.6-35b-a3b" | "qwen/qwen3.6-27b" => Some(262_140),
-        "xiaomi/mimo-v2.5-pro" | "xiaomi/mimo-v2.5" => Some(131_072),
+        "xiaomi/mimo-v2.5-pro" | "xiaomi/mimo-v2.5" | "mimo-v2.5-pro" | "mimo-v2.5" => {
+            Some(131_072)
+        }
         "qwen/qwen3.7-max" | "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free" => Some(65_536),
         "google/gemma-4-31b-it" => Some(16_384),
         "google/gemma-4-31b-it:free" | "google/gemma-4-26b-a4b-it:free" => Some(32_768),
@@ -291,6 +298,7 @@ pub fn model_supports_reasoning(model: &str) -> bool {
             | "google/gemma-4-26b-a4b-it:free"
             | "moonshotai/kimi-k2.6"
             | "moonshotai/kimi-k2.6:free"
+            | "minimax/minimax-m3"
             | "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free"
             | "qwen/qwen3.7-max"
             | "qwen/qwen3.6-35b-a3b"
@@ -298,6 +306,8 @@ pub fn model_supports_reasoning(model: &str) -> bool {
             | "tencent/hy3-preview"
             | "xiaomi/mimo-v2.5-pro"
             | "xiaomi/mimo-v2.5"
+            | "mimo-v2.5-pro"
+            | "mimo-v2.5"
             | "z-ai/glm-5.1"
     )
 }
@@ -493,6 +503,8 @@ mod tests {
             (concat!("qwen/", "qwen3.7-max"), 1_000_000),
             (concat!("qwen/", "qwen3.6-35b-a3b"), 262_144),
             (concat!("xiaomi/", "mimo-v2.5-pro"), 1_000_000),
+            ("mimo-v2.5-pro", 1_000_000),
+            ("minimax/minimax-m3", 1_000_000),
             ("moonshotai/kimi-k2.6", 262_144),
             ("google/gemma-4-31b-it", 262_144),
             ("z-ai/glm-5.1", 202_752),
@@ -515,6 +527,11 @@ mod tests {
         assert_eq!(
             max_output_tokens_for_model(concat!("xiaomi/", "mimo-v2.5-pro")),
             Some(131_072)
+        );
+        assert_eq!(max_output_tokens_for_model("mimo-v2.5-pro"), Some(131_072));
+        assert_eq!(
+            max_output_tokens_for_model("minimax/minimax-m3"),
+            Some(524_288)
         );
     }
 

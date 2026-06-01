@@ -255,6 +255,17 @@ impl Default for ModelRegistry {
                 supports_reasoning: true,
             },
             ModelInfo {
+                id: "minimax/minimax-m3".to_string(),
+                provider: ProviderKind::Openrouter,
+                aliases: vec![
+                    "minimax-m3".to_string(),
+                    "minimax-m-3".to_string(),
+                    "openrouter-minimax-m3".to_string(),
+                ],
+                supports_tools: true,
+                supports_reasoning: true,
+            },
+            ModelInfo {
                 id: "z-ai/glm-5.1".to_string(),
                 provider: ProviderKind::Openrouter,
                 aliases: vec!["glm-5.1".to_string(), "zai-glm-5.1".to_string()],
@@ -739,6 +750,7 @@ mod tests {
             ("qwen3.6-35b-a3b", "qwen/qwen3.6-35b-a3b"),
             ("gemma-4-31b-it", "google/gemma-4-31b-it"),
             ("glm-5.1", "z-ai/glm-5.1"),
+            ("minimax-m3", "minimax/minimax-m3"),
             ("openrouter-mimo-v2.5-pro", "xiaomi/mimo-v2.5-pro"),
             ("openrouter-kimi-k2.6", "moonshotai/kimi-k2.6"),
         ] {

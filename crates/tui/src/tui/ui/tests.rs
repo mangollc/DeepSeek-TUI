@@ -1,5 +1,8 @@
 use super::*;
-use crate::config::{ApiProvider, Config, DEFAULT_TEXT_MODEL};
+use crate::config::{
+    ApiProvider, Config, DEFAULT_OPENROUTER_MODEL, DEFAULT_TEXT_MODEL, ProviderConfig,
+    ProvidersConfig,
+};
 use crate::config_ui::{self, WebConfigSession, WebConfigSessionEvent};
 use crate::core::engine::mock_engine_handle;
 use crate::tui::active_cell::ActiveCell;
@@ -2146,6 +2149,67 @@ async fn provider_switch_clears_turn_cache_history() {
 
     assert_eq!(app.api_provider, ApiProvider::Ollama);
     assert!(app.session.turn_cache_history.is_empty());
+}
+
+#[tokio::test]
+async fn provider_switch_to_deepseek_canonicalizes_openrouter_default_model() {
+    let _home = SettingsHomeGuard::new();
+    let mut app = create_test_app();
+    app.api_provider = ApiProvider::Openrouter;
+    app.model = DEFAULT_OPENROUTER_MODEL.to_string();
+    let mut engine = mock_engine_handle();
+    let mut config = Config {
+        provider: Some("openrouter".to_string()),
+        api_key: Some("test-key".to_string()),
+        default_text_model: Some(DEFAULT_OPENROUTER_MODEL.to_string()),
+        ..Default::default()
+    };
+
+    switch_provider(
+        &mut app,
+        &mut engine.handle,
+        &mut config,
+        ApiProvider::Deepseek,
+        None,
+    )
+    .await;
+
+    assert_eq!(app.api_provider, ApiProvider::Deepseek);
+    assert!(!app.model_ids_passthrough);
+    assert_eq!(app.model, DEFAULT_TEXT_MODEL);
+}
+
+#[tokio::test]
+async fn provider_switch_to_openrouter_canonicalizes_deepseek_default_model() {
+    let _home = SettingsHomeGuard::new();
+    let mut app = create_test_app();
+    app.api_provider = ApiProvider::Deepseek;
+    app.model = DEFAULT_TEXT_MODEL.to_string();
+    let mut engine = mock_engine_handle();
+    let mut config = Config {
+        provider: Some("deepseek".to_string()),
+        default_text_model: Some(DEFAULT_TEXT_MODEL.to_string()),
+        providers: Some(ProvidersConfig {
+            openrouter: ProviderConfig {
+                api_key: Some("test-key".to_string()),
+                ..Default::default()
+            },
+            ..Default::default()
+        }),
+        ..Default::default()
+    };
+
+    switch_provider(
+        &mut app,
+        &mut engine.handle,
+        &mut config,
+        ApiProvider::Openrouter,
+        None,
+    )
+    .await;
+
+    assert_eq!(app.api_provider, ApiProvider::Openrouter);
+    assert_eq!(app.model, DEFAULT_OPENROUTER_MODEL);
 }
 
 #[tokio::test]

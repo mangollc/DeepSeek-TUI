@@ -5448,6 +5448,13 @@ mod tests {
 
     #[test]
     fn app_new_with_explicit_api_key_does_not_trigger_onboarding() {
+        let _lock = lock_test_env();
+        let tmp = tempfile::TempDir::new().expect("tempdir");
+        let config_path = tmp.path().join("config.toml");
+        let _config_path = EnvVarGuard::set("DEEPSEEK_CONFIG_PATH", &config_path);
+        let _provider_env = EnvVarGuard::remove("CODEWHALE_PROVIDER");
+        let _legacy_provider_env = EnvVarGuard::remove("DEEPSEEK_PROVIDER");
+
         let config = Config {
             api_key: Some("sk-test-onboarding-key".to_string()),
             ..Config::default()
